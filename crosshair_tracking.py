@@ -30,7 +30,7 @@ def capture_frame():
     #note since obs was installed via windows, we have to use the windows path rather than the WSL path
     screenshot_path = "/mnt/c/Users/imar3/Videos/screenshot.png"
 
-    print(f"📸 Attempting to load screenshot from: {screenshot_path}")
+    print(f"Attempting to load screenshot from: {screenshot_path}")
 
     #may not need this, just used to make sure there is time for the file to load
     time.sleep(1)
