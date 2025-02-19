@@ -4,63 +4,52 @@ import time
 import cv2
 import os
 
-# ✅ Connect to OBS WebSocket
+#this is connecting via websocket
 try:
-    client = obs.ReqClient(host='10.0.0.3', port=4455, password='7Fm2xoPwhQVi5Cua')  # Update IP & password
-    print("✅ Connected to OBS WebSockets successfully!")
+    client = obs.ReqClient(host='10.0.0.3', port=4455, password='7Fm2xoPwhQVi5Cua')  #to make sure we are connected to the client
+    print("Connected to OBS WebSockets successfully!")
 except Exception as e:
-    print(f"❌ Failed to connect to OBS WebSockets: {e}")
+    print(f"Failed to connect to OBS WebSockets: {e}")
     exit()
 
 try:
     response = client.get_scene_list()
     if hasattr(response, "scenes"):
-        scenes = [scene["sceneName"] for scene in response.scenes]  # Extract scene names
-        print("🖥️ Available Scenes:", scenes)
+        scenes = [scene["sceneName"] for scene in response.scenes]  #just a check for if the scene is there
+        print("Available Scenes:", scenes)
     else:
-        print("❌ No valid scene data received from OBS.")
+        print("No valid scene data received from OBS.")
         exit()
 except Exception as e:
-    print(f"❌ Failed to fetch scene list: {e}")
+    print(f"Failed to fetch scene list: {e}")
     exit()
 
 def capture_frame():
-    """Captures a frame from OBS and saves it as an image."""
-    try:
-        screenshot_path = "/tmp/screenshot.png"  # Ensure directory exists
+    """Captures a frame from OBS and ensures it is properly detected."""
+    
+    #note since obs was installed via windows, we have to use the windows path rather than the WSL path
+    screenshot_path = "/mnt/c/Users/imar3/Videos/screenshot.png"
 
-        response = client.save_source_screenshot(
-            name="CS2",  
-            img_format="png",
-            file_path=screenshot_path,  
-            width=1920,  
-            height=1080,  
-            quality=-1  
-        )
+    print(f"📸 Attempting to load screenshot from: {screenshot_path}")
 
-        print("📸 Screenshot response:", response)
+    #may not need this, just used to make sure there is time for the file to load
+    time.sleep(1)
 
-        # ✅ Check if response contains useful data
-        if response:
-            print(f"📸 Screenshot saved: {screenshot_path}")
+    #checking that the file is found
+    if os.path.isfile(screenshot_path):
+        print("Screenshot file found!")
+
+        frame = cv2.imread(screenshot_path)
+
+        #wanting to check file is loading correctly
+        if frame is not None:
+            print("Frame successfully loaded!")
+            return frame
         else:
-            print("❌ No response received from OBS WebSocket.")
-
-        # ✅ Verify if screenshot was saved
-        if os.path.exists(screenshot_path):
-            frame = cv2.imread(screenshot_path)
-            if frame is not None:
-                print("✅ Frame successfully loaded!")
-                return frame
-            else:
-                print("❌ Failed to load screenshot as an image.")
-                return None
-        else:
-            print("❌ Screenshot file not found. Check OBS logs.")
+            print("Failed to load screenshot as an image.")
             return None
-
-    except Exception as e:
-        print(f"❌ Failed to capture frame: {e}")
+    else:
+        print("Screenshot file not found. Check OBS logs.")
         return None
 
 
